@@ -1,0 +1,1738 @@
+/* ============================================
+   THE DEEP — Ocean Descent Experience
+   ============================================ */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --surface: #0891B2;
+    --surface-light: #22D3EE;
+    --twilight: #1E3A5F;
+    --midnight: #020617;
+    --abyss: #000000;
+    
+    --bioluminescent: #00F5D4;
+    --bioluminescent-soft: rgba(0, 245, 212, 0.3);
+    --bioluminescent-magenta: #E040FB;
+    
+    --text: #F8FAFC;
+    --text-muted: rgba(248, 250, 252, 0.6);
+    --text-dim: rgba(248, 250, 252, 0.3);
+    --card-bg: rgba(15, 23, 42, 0.94);
+    --card-border: rgba(248, 250, 252, 0.1);
+    
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-body: 'DM Sans', -apple-system, sans-serif;
+    
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--midnight);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   VIDEO LAYERS
+   ============================================ */
+
+.video-layers {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.video-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 2s var(--ease-smooth);
+}
+
+.video-layer.active {
+    opacity: 1;
+}
+
+.video-layer video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 102%;
+    min-height: 102%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    animation: subtleDrift 20s ease-in-out infinite;
+    object-fit: cover;
+}
+
+.video-layer .layer-bg {
+    z-index: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+    animation: subtleDrift 25s ease-in-out infinite;
+}
+
+.video-layer .layer-main {
+    z-index: 2;
+    animation: subtleDrift 20s ease-in-out infinite reverse;
+}
+
+.video-layer .layer-fg {
+    z-index: 3;
+    mix-blend-mode: screen;
+    opacity: 0.75;
+    animation: subtleDrift 15s ease-in-out infinite;
+}
+
+@keyframes subtleDrift {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    25% { transform: translate(-50.3%, -49.8%) scale(1.005); }
+    50% { transform: translate(-49.7%, -50.2%) scale(1.01); }
+    75% { transform: translate(-50.2%, -50.3%) scale(1.005); }
+}
+
+/* Event Layer */
+.event-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s var(--ease-smooth);
+}
+
+.event-layer.active {
+    opacity: 1;
+}
+
+.event-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Overlays - Progressive Darkness */
+.depth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 10, 30, 0.3) 0%,
+        rgba(0, 5, 20, 0.6) 30%,
+        rgba(0, 0, 10, 0.85) 60%,
+        rgba(0, 0, 0, 1) 100%
+    );
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+
+/* Additional darkness layer for abyss */
+.abyss-darkness {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6.5;
+    pointer-events: none;
+    background: rgba(0, 0, 0, var(--abyss-darkness, 0));
+    transition: background 0.6s var(--ease-smooth);
+}
+
+.light-rays {
+    position: fixed;
+    top: -50%;
+    left: -25%;
+    width: 150%;
+    height: 150%;
+    z-index: 7;
+    pointer-events: none;
+    background: 
+        linear-gradient(165deg, rgba(255, 250, 220, 0.25) 0%, transparent 20%),
+        linear-gradient(175deg, rgba(255, 245, 200, 0.2) 0%, transparent 30%),
+        linear-gradient(155deg, rgba(255, 240, 180, 0.15) 0%, transparent 25%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
+    opacity: 1;
+    transition: opacity 2s ease;
+    animation: rayShimmer 8s ease-in-out infinite;
+}
+
+@keyframes rayShimmer {
+    0%, 100% { transform: translateY(0) scale(1); opacity: var(--ray-opacity, 1); }
+    50% { transform: translateY(-2%) scale(1.02); opacity: calc(var(--ray-opacity, 1) * 0.85); }
+}
+
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.discovery-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    z-index: 9;
+    pointer-events: none;
+    background: radial-gradient(circle at center, var(--bioluminescent-soft), transparent 70%);
+    opacity: 0;
+}
+
+.discovery-flash.active {
+    animation: flashPulse 0.6s var(--ease-out);
+}
+
+@keyframes flashPulse {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   FIXED UI
+   ============================================ */
+
+.fixed-ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.fixed-ui > * {
+    pointer-events: auto;
+}
+
+/* Depth Meter */
+.depth-meter {
+    position: absolute;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.depth-gauge {
+    width: 2px;
+    height: 160px;
+    background: rgba(248, 250, 252, 0.1);
+    border-radius: 1px;
+    position: relative;
+}
+
+.depth-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to bottom, var(--surface-light), var(--bioluminescent));
+    border-radius: 1px;
+}
+
+.depth-marker {
+    position: absolute;
+    left: 50%;
+    top: 0%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--text);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(248, 250, 252, 0.8);
+}
+
+.current-depth {
+    text-align: center;
+}
+
+.depth-number {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text);
+}
+
+.depth-unit {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+}
+
+/* Zone Indicator */
+.zone-indicator {
+    position: absolute;
+    top: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.zone-name {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Environmental Data */
+.env-data {
+    position: absolute;
+    left: 2.5rem;
+    top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.env-item {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.65rem;
+}
+
+.env-label {
+    color: var(--text-dim);
+    min-width: 50px;
+}
+
+.env-value {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Discovery Counter */
+.discovery-counter {
+    position: absolute;
+    top: 2.5rem;
+    right: 2.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.discovered-count {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--bioluminescent);
+}
+
+.discovered-count.bump {
+    animation: countBump 0.4s var(--ease-out);
+}
+
+@keyframes countBump {
+    50% { transform: scale(1.4); }
+}
+
+.discovery-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+/* Journal Button */
+.journal-btn {
+    position: absolute;
+    right: 2.5rem;
+    bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 100px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    backdrop-filter: blur(10px);
+}
+
+.journal-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+.journal-btn:hover {
+    border-color: var(--bioluminescent);
+    box-shadow: 0 0 25px var(--bioluminescent-soft);
+}
+
+/* Sound Container */
+.sound-container {
+    position: absolute;
+    right: 2.5rem;
+    bottom: 6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Sound Hint */
+.sound-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    background: rgba(0, 40, 60, 0.7);
+    border: 1px solid var(--bioluminescent-soft);
+    border-radius: 100px;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    color: var(--bioluminescent);
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    animation: hintPulse 3s ease-in-out infinite, hintFadeIn 0.8s ease both;
+    cursor: pointer;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.sound-hint svg {
+    width: 14px;
+    height: 14px;
+    animation: hintArrow 1.5s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 transparent;
+    }
+    50% { 
+        box-shadow: 0 0 20px var(--bioluminescent-soft);
+    }
+}
+
+@keyframes hintArrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+}
+
+@keyframes hintFadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateX(-10px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+}
+
+.sound-hint.hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* Sound Button */
+.sound-btn {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 50%;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    backdrop-filter: blur(10px);
+}
+
+.sound-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.sound-btn .sound-off { display: none; }
+.sound-btn.muted .sound-on { display: none; }
+.sound-btn.muted .sound-off { display: block; }
+
+/* Scroll Hint */
+.scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    animation: fadeIn 1s var(--ease-out) 1s both;
+    transition: opacity 0.5s;
+}
+
+.scroll-hint.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scroll-hint svg {
+    width: 18px;
+    height: 18px;
+    animation: bobDown 2.5s var(--ease-smooth) infinite;
+}
+
+@keyframes bobDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+.descent {
+    position: relative;
+    z-index: 10;
+}
+
+/* Intro */
+.intro-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.intro-content {
+    max-width: 550px;
+}
+
+.intro-prelude {
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--surface-light);
+    margin-bottom: 0.75rem;
+    animation: fadeIn 1s var(--ease-out) 0.2s both;
+}
+
+.intro-title {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 11vw, 7rem);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 0.9;
+    margin-bottom: 1.25rem;
+    animation: fadeIn 1s var(--ease-out) 0.4s both;
+}
+
+.intro-description {
+    font-size: 1rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 3.5rem;
+    animation: fadeIn 1s var(--ease-out) 0.6s both;
+}
+
+.intro-instruction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text);
+    animation: fadeIn 1s var(--ease-out) 0.8s both;
+}
+
+.scroll-line {
+    width: 1px;
+    height: 45px;
+    background: linear-gradient(to bottom, var(--text-muted), transparent);
+    animation: extendDown 2.5s var(--ease-out) infinite;
+}
+
+@keyframes extendDown {
+    0% { opacity: 0; transform: scaleY(0); transform-origin: top; }
+    50% { opacity: 1; transform: scaleY(1); }
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   ZONE SECTIONS
+   ============================================ */
+
+.zone-section {
+    min-height: 200vh; /* Each zone = roughly its depth range in scroll */
+    position: relative;
+    padding: 15vh 2rem 10vh;
+}
+
+.zone-section[data-zone="sunlight"] { min-height: 180vh; }
+.zone-section[data-zone="twilight"] { min-height: 220vh; }
+.zone-section[data-zone="midnight"] { min-height: 280vh; }
+.zone-section[data-zone="abyss"] { 
+    min-height: auto; 
+    padding: 15vh 2rem 0; 
+    position: relative;
+}
+
+/* Spacer after abyss intro */
+/* Abyss intro area - scrolls away */
+.abyss-intro-area {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.abyss-intro-area .zone-intro {
+    position: relative;
+    top: 0;
+}
+
+.abyss-spacer {
+    min-height: 80vh;
+}
+
+/* Giant Isopod area in abyss */
+.abyss-creature-area {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.abyss-creature-area .creature {
+    position: relative;
+    left: auto;
+    top: auto;
+}
+
+/* Scroll gap before final message */
+.abyss-descent {
+    min-height: 100vh;
+}
+
+.final-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 4rem 2rem;
+    z-index: 50;
+}
+
+.zone-intro {
+    position: sticky;
+    top: 28vh;
+    max-width: 420px;
+    margin-left: 10%;
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 1.5s ease, transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zone-section.in-view .zone-intro {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.zone-section.in-view .zone-intro .zone-depth {
+    animation: fadeSlideIn 1s ease 0.2s both;
+}
+
+.zone-section.in-view .zone-intro .zone-title {
+    animation: fadeSlideIn 1.2s ease 0.4s both;
+}
+
+.zone-section.in-view .zone-intro .zone-description {
+    animation: fadeSlideIn 1.4s ease 0.6s both;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.zone-depth {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--bioluminescent);
+    margin-bottom: 0.6rem;
+}
+
+.zone-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    line-height: 1.1;
+    text-shadow: 0 0 40px rgba(0, 245, 212, 0.15);
+}
+
+.zone-description {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    max-width: 340px;
+}
+
+/* Zone Transition Text */
+.zone-transition {
+    position: absolute;
+    bottom: 8vh;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.zone-transition p {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-dim);
+}
+
+/* ============================================
+   CREATURE MARKERS - HIGHLY VISIBLE
+   ============================================ */
+
+.creature {
+    position: absolute;
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    z-index: 50;
+    cursor: pointer;
+}
+
+.creature-marker {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Pulsing ring */
+.marker-ping {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--bioluminescent);
+    opacity: 0;
+    animation: markerPing 2.5s var(--ease-out) infinite;
+    box-shadow: 0 0 10px var(--bioluminescent-soft);
+}
+
+@keyframes markerPing {
+    0% {
+        transform: scale(0.6);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Center dot */
+.marker-dot {
+    width: 24px;
+    height: 24px;
+    background: var(--bioluminescent);
+    border-radius: 50%;
+    border: 2px solid rgba(0, 30, 50, 0.25);
+    box-shadow: 
+        0 0 0 4px rgba(0, 20, 40, 0.15),
+        0 0 20px var(--bioluminescent),
+        0 0 40px var(--bioluminescent-soft);
+    animation: markerGlow 3s ease-in-out infinite;
+}
+
+@keyframes markerGlow {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 
+            0 0 20px var(--bioluminescent),
+            0 0 40px var(--bioluminescent-soft),
+            0 0 80px var(--bioluminescent-soft);
+    }
+    50% { 
+        transform: scale(1.2); 
+        box-shadow: 
+            0 0 30px var(--bioluminescent),
+            0 0 60px var(--bioluminescent-soft),
+            0 0 100px var(--bioluminescent-soft);
+    }
+}
+
+/* Label */
+.marker-label {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bioluminescent);
+    white-space: nowrap;
+    padding: 2px 6px;
+    background: rgba(0, 20, 40, 0.4);
+    border-radius: 8px;
+    text-shadow: 0 0 8px var(--bioluminescent);
+}
+
+/* Bioluminescent variant for deep creatures */
+.marker-bioluminescent .marker-ping {
+    border-color: var(--bioluminescent-magenta);
+    box-shadow: 0 0 10px rgba(224, 64, 251, 0.3);
+}
+
+.marker-bioluminescent .marker-dot {
+    background: linear-gradient(135deg, var(--bioluminescent-magenta), var(--bioluminescent));
+    box-shadow: 
+        0 0 0 4px rgba(0, 20, 40, 0.15),
+        0 0 20px var(--bioluminescent-magenta),
+        0 0 40px rgba(224, 64, 251, 0.3);
+}
+
+.marker-bioluminescent .marker-label {
+    color: var(--bioluminescent-magenta);
+    text-shadow: 0 0 8px rgba(224, 64, 251, 0.5);
+}
+
+/* Hover state */
+.creature:hover .marker-dot {
+    transform: scale(1.2);
+    box-shadow: 
+        0 0 0 5px rgba(0, 20, 40, 0.1),
+        0 0 25px var(--bioluminescent),
+        0 0 50px var(--bioluminescent-soft);
+}
+
+.creature:hover .marker-ping {
+    animation: none;
+    opacity: 0;
+}
+
+/* Discovered state */
+.creature.discovered .marker-ping {
+    animation: none;
+    opacity: 0;
+}
+
+.creature.discovered .marker-dot {
+    background: var(--text);
+    box-shadow: 
+        0 0 0 4px rgba(0, 20, 40, 0.1),
+        0 0 12px rgba(248, 250, 252, 0.4);
+}
+
+.creature.discovered .marker-label {
+    color: var(--text-muted);
+    text-shadow: none;
+}
+
+.creature.discovered .marker-label::after {
+    content: ' ✓';
+}
+
+/* ============================================
+   CREATURE CARDS
+   ============================================ */
+
+.creature-card {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 1.5rem);
+    transform: translateY(-50%) translateX(-20px) scale(0.92);
+    width: 300px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    backdrop-filter: blur(25px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s var(--ease-out);
+    overflow: hidden;
+    z-index: 100;
+}
+
+.creature:hover .creature-card,
+.creature.card-open .creature-card {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+    pointer-events: auto;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 80px rgba(0, 245, 212, 0.1);
+}
+
+/* Flip to left for right-positioned creatures */
+.creature[style*="--x: 6"] .creature-card,
+.creature[style*="--x: 7"] .creature-card {
+    left: auto;
+    right: calc(100% + 1rem);
+    transform: translateY(-50%) translateX(15px) scale(0.95);
+}
+
+.creature[style*="--x: 6"]:hover .creature-card,
+.creature[style*="--x: 7"]:hover .creature-card,
+.creature[style*="--x: 6"].card-open .creature-card,
+.creature[style*="--x: 7"].card-open .creature-card {
+    transform: translateY(-50%) translateX(0) scale(1);
+}
+
+.creature-image {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    position: relative;
+}
+
+.creature-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to top, var(--card-bg), transparent);
+}
+
+.creature-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: creatureFloat 5s var(--ease-smooth) infinite;
+}
+
+@keyframes creatureFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.creature-info {
+    padding: 1rem 1.25rem 1.25rem;
+    position: relative;
+}
+
+.creature-discovered-tag {
+    display: none;
+    position: absolute;
+    top: -0.5rem;
+    right: 1rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--midnight);
+    background: var(--bioluminescent);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.creature.discovered .creature-discovered-tag {
+    display: block;
+}
+
+.creature-info h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.15rem;
+}
+
+.creature-latin {
+    font-style: italic;
+    font-size: 0.75rem;
+    color: var(--bioluminescent);
+    margin-bottom: 0.75rem;
+}
+
+.creature-fact {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+.creature-depth-tag {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.25rem 0.6rem;
+    background: rgba(248, 250, 252, 0.04);
+    border-radius: 100px;
+}
+
+/* ============================================
+   FINAL SECTION
+   ============================================ */
+
+.final-content {
+    max-width: 480px;
+    position: relative;
+    z-index: 100;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.final-content h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 1.25rem;
+}
+
+.final-stats {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 2;
+    margin-bottom: 1.25rem;
+}
+
+.stat-highlight {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--bioluminescent);
+}
+
+.final-content > p:last-of-type {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+.ascend-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--bioluminescent);
+    border-radius: 100px;
+    color: var(--bioluminescent);
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.4s var(--ease-out);
+}
+
+.ascend-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.ascend-btn:hover {
+    background: var(--bioluminescent);
+    color: var(--midnight);
+    box-shadow: 0 0 35px var(--bioluminescent-soft);
+}
+
+/* ============================================
+   JOURNAL MODAL - Immersive Research Log
+   ============================================ */
+
+.journal-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 5, 15, 0.4);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s var(--ease-out);
+}
+
+.journal-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.journal-content {
+    position: relative;
+    width: 90%;
+    max-width: 520px;
+    max-height: 85vh;
+    background: linear-gradient(180deg, rgba(5, 15, 35, 0.75) 0%, rgba(0, 10, 25, 0.8) 100%);
+    border: 1px solid rgba(0, 245, 212, 0.2);
+    border-radius: 24px;
+    padding: 2.5rem 2rem 2rem;
+    overflow-y: auto;
+    transform: translateY(30px) scale(0.94);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 
+        0 0 100px rgba(0, 245, 212, 0.1),
+        0 25px 80px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+}
+
+.journal-modal.open .journal-content {
+    transform: translateY(0) scale(1);
+}
+
+/* Decorative corner accents */
+.journal-content::before,
+.journal-content::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 1px solid rgba(0, 245, 212, 0.2);
+    pointer-events: none;
+}
+
+.journal-content::before {
+    top: 12px;
+    left: 12px;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 12px 0 0 0;
+}
+
+.journal-content::after {
+    bottom: 12px;
+    right: 12px;
+    border-left: none;
+    border-top: none;
+    border-radius: 0 0 12px 0;
+}
+
+.journal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 245, 212, 0.05);
+    border: 1px solid rgba(0, 245, 212, 0.2);
+    border-radius: 50%;
+    color: var(--bioluminescent);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    z-index: 10;
+}
+
+.journal-close:hover {
+    background: rgba(0, 245, 212, 0.15);
+    border-color: var(--bioluminescent);
+    transform: rotate(90deg);
+}
+
+.journal-close svg {
+    width: 14px;
+    height: 14px;
+}
+
+.journal-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 245, 212, 0.1);
+}
+
+.journal-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--text) 0%, var(--bioluminescent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.journal-header p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+}
+
+.journal-stats {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(0, 245, 212, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 245, 212, 0.08);
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    background: linear-gradient(180deg, var(--bioluminescent) 0%, rgba(0, 245, 212, 0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+    text-shadow: 0 0 30px rgba(0, 245, 212, 0.3);
+}
+
+.stat-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.journal-entries-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+}
+
+.journal-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.journal-entry {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.03) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border: 1px solid rgba(0, 245, 212, 0.08);
+    border-radius: 14px;
+    align-items: center;
+    transition: all 0.3s var(--ease-out);
+}
+
+.journal-entry:hover {
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+    border-color: rgba(0, 245, 212, 0.2);
+    transform: translateX(4px);
+}
+
+.journal-entry-image {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(0, 20, 40, 0.5);
+    border: 1px solid rgba(0, 245, 212, 0.1);
+}
+
+.journal-entry-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.journal-entry-info h4 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    margin-bottom: 0.2rem;
+    color: var(--text);
+}
+
+.journal-entry-info p {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.journal-entry-info em {
+    color: var(--bioluminescent);
+    opacity: 0.7;
+}
+
+.journal-entry-depth {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+}
+
+.journal-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-muted);
+    background: rgba(0, 245, 212, 0.02);
+    border-radius: 16px;
+    border: 1px dashed rgba(0, 245, 212, 0.15);
+}
+
+.journal-empty p {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.journal-empty-hint {
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+}
+
+/* Mobile Creature Modal - hidden on desktop */
+.creature-modal {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .creature-modal {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 15, 30, 0.9);
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .creature-modal.open {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .creature-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+        transition: background 0.2s ease;
+    }
+    
+    .creature-modal-close:hover,
+    .creature-modal-close:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .creature-modal-close svg {
+        width: 20px;
+        height: 20px;
+        color: white;
+    }
+    
+    .creature-modal-content {
+        width: 100%;
+        max-width: 340px;
+        max-height: 80vh;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        overflow: hidden;
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .creature-modal.open .creature-modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    .creature-modal-content .modal-image {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .creature-modal-content .modal-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .creature-modal-content .modal-info {
+        padding: 1.25rem 1.5rem 1.5rem;
+    }
+    
+    .creature-modal-content .modal-info h3 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 400;
+        margin-bottom: 0.25rem;
+        color: var(--text);
+    }
+    
+    .creature-modal-content .modal-latin {
+        font-style: italic;
+        font-size: 0.85rem;
+        color: var(--bioluminescent);
+        margin-bottom: 1rem;
+    }
+    
+    .creature-modal-content .modal-fact {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .creature-modal-content .modal-depth {
+        display: inline-block;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        padding: 0.4rem 0.8rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE OPTIMIZATION
+   ============================================ */
+
+@media (max-width: 768px) {
+    /* Hide depth meter on mobile - too cluttered */
+    .depth-meter {
+        display: none;
+    }
+    
+    /* Simplified environmental data - top left, compact */
+    .env-data {
+        left: 1rem;
+        top: auto;
+        bottom: 1rem;
+        flex-direction: row;
+        gap: 1rem;
+        background: rgba(0, 10, 20, 0.8);
+        padding: 0.6rem 1rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 245, 212, 0.15);
+    }
+    
+    .env-item {
+        flex-direction: row;
+        gap: 0.4rem;
+    }
+    
+    .env-value {
+        font-size: 0.8rem;
+    }
+    
+    .env-label {
+        display: none;
+    }
+    
+    /* Zone indicator - centered top */
+    .zone-indicator {
+        top: 1rem;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        background: rgba(0, 10, 20, 0.8);
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 245, 212, 0.15);
+    }
+    
+    .zone-indicator .zone-name {
+        font-size: 0.7rem;
+    }
+    
+    /* Discovery counter - top right */
+    .discovery-counter {
+        right: 1rem;
+        top: 1rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .discovery-counter span:first-child {
+        display: none;
+    }
+    
+    /* Journal and sound buttons - bottom right stack */
+    .journal-btn {
+        right: 1rem;
+        bottom: 1rem;
+        padding: 0.6rem;
+        min-width: auto;
+    }
+    
+    .journal-btn span {
+        display: none;
+    }
+    
+    .sound-container {
+        right: 1rem;
+        bottom: 5rem;
+    }
+    
+    .sound-hint {
+        font-size: 0.6rem;
+        padding: 0.4rem 0.7rem;
+    }
+    
+    .sound-hint svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    /* Zone intro - full width, centered */
+    .zone-intro {
+        margin-left: 0;
+        padding: 0 1.5rem;
+        text-align: center;
+        max-width: 100%;
+    }
+    
+    .zone-title {
+        font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+    
+    .zone-description {
+        font-size: 0.85rem;
+    }
+    
+    .zone-depth {
+        font-size: 0.55rem;
+    }
+    
+    /* Zone sections - less padding */
+    .zone-section {
+        padding: 10vh 1rem;
+        min-height: 100vh;
+    }
+    
+    /* Creatures - repositioned for mobile */
+    .creature {
+        position: absolute;
+        transform: translate(-50%, -50%);
+    }
+    
+    /* Spread creatures across mobile viewport */
+    /* Sunlight zone creatures */
+    .zone-section[data-zone="sunlight"] .creature:nth-child(2) { left: 25% !important; top: 20% !important; }
+    .zone-section[data-zone="sunlight"] .creature:nth-child(3) { left: 75% !important; top: 35% !important; }
+    .zone-section[data-zone="sunlight"] .creature:nth-child(4) { left: 22% !important; top: 55% !important; }
+    .zone-section[data-zone="sunlight"] .creature:nth-child(5) { left: 72% !important; top: 75% !important; }
+    
+    /* Twilight zone creatures */
+    .zone-section[data-zone="twilight"] .creature:nth-child(2) { left: 78% !important; top: 18% !important; }
+    .zone-section[data-zone="twilight"] .creature:nth-child(3) { left: 22% !important; top: 38% !important; }
+    .zone-section[data-zone="twilight"] .creature:nth-child(4) { left: 75% !important; top: 55% !important; }
+    .zone-section[data-zone="twilight"] .creature:nth-child(5) { left: 28% !important; top: 75% !important; }
+    
+    /* Midnight zone creatures */
+    .zone-section[data-zone="midnight"] .creature:nth-child(2) { left: 72% !important; top: 20% !important; }
+    .zone-section[data-zone="midnight"] .creature:nth-child(3) { left: 25% !important; top: 45% !important; }
+    .zone-section[data-zone="midnight"] .creature:nth-child(4) { left: 75% !important; top: 70% !important; }
+    
+    /* Abyss creature - centered */
+    .abyss-creature-area .creature { left: 50% !important; top: 50% !important; }
+    
+    .creature-marker {
+        width: 70px;
+        height: 70px;
+        /* Larger touch target */
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .marker-dot {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .marker-label {
+        font-size: 0.5rem;
+        padding: 2px 5px;
+    }
+    
+    /* Hide hover cards on mobile - we use the modal instead */
+    .creature .creature-card {
+        display: none !important;
+    }
+    
+    .creature-image {
+        height: 150px;
+    }
+    
+    /* Intro section */
+    .intro-content {
+        padding: 0 1.5rem;
+    }
+    
+    .intro-title {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+    }
+    
+    .intro-description {
+        font-size: 0.9rem;
+        padding: 0 0.5rem;
+    }
+    
+    /* Final section */
+    .final-content {
+        padding: 0 1.5rem;
+    }
+    
+    .final-content h2 {
+        font-size: clamp(1.3rem, 5vw, 1.8rem);
+    }
+    
+    /* Journal modal - full screen on mobile */
+    .journal-content {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        padding: 1.5rem;
+    }
+    
+    .journal-stats {
+        gap: 2rem;
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    /* Scroll hint */
+    .scroll-hint {
+        bottom: 15vh;
+    }
+    
+    /* Abyss section */
+    .abyss-creature-area {
+        min-height: 60vh;
+    }
+    
+    .abyss-spacer,
+    .abyss-descent {
+        min-height: 30vh;
+    }
+    
+    /* Light rays - subtle on mobile */
+    .light-rays {
+        opacity: 0.5;
+    }
+    
+    /* Particles - fewer on mobile for performance */
+    .particles {
+        opacity: 0.6;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+    .intro-title {
+        font-size: 2.2rem;
+    }
+    
+    .zone-title {
+        font-size: 1.4rem;
+    }
+    
+    .env-data {
+        gap: 0.6rem;
+        padding: 0.5rem 0.8rem;
+    }
+}

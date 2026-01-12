@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Deep — An Ocean Descent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Fixed UI Layer -->
+    <div class="fixed-ui">
+        <!-- Depth Meter -->
+        <div class="depth-meter">
+            <div class="depth-gauge">
+                <div class="depth-fill" id="depthFill"></div>
+                <div class="depth-marker" id="depthMarker"></div>
+            </div>
+            <div class="current-depth">
+                <span class="depth-number" id="depthNumber">0</span>
+                <span class="depth-unit">meters</span>
+            </div>
+        </div>
+
+        <!-- Zone Indicator -->
+        <div class="zone-indicator" id="zoneIndicator">
+            <span class="zone-name" id="zoneName">Surface</span>
+        </div>
+
+
+        <!-- Discovery Counter -->
+        <div class="discovery-counter" id="discoveryCounter">
+            <span class="discovered-count" id="discoveredCount">0</span>
+            <span class="discovery-label">/ 12 discovered</span>
+        </div>
+
+        <!-- Journal Button -->
+        <button class="journal-btn" id="journalBtn" aria-label="Open Research Journal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <path d="M8 7h8M8 11h6"/>
+            </svg>
+            <span>Journal</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <div class="sound-container">
+            <div class="sound-hint" id="soundHint">
+                <span>Enable sound for the full experience</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+            <button class="sound-btn" id="soundBtn" aria-label="Toggle sound">
+                <svg class="sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/>
+                </svg>
+                <svg class="sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                    <path d="M23 9l-6 6M17 9l6 6"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Scroll Hint -->
+        <div class="scroll-hint" id="scrollHint">
+            <span>Scroll to descend</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Video Background Layers -->
+    <div class="video-layers" id="videoLayers">
+        <!-- Sunlight Zone (with layers) -->
+        <div class="video-layer" data-zone="sunlight">
+            <video class="layer-main" muted loop playsinline preload="auto">
+                <source src="assets/zones/sunlight.mp4" type="video/mp4">
+            </video>
+            <video class="layer-fg" muted loop playsinline preload="auto">
+                <source src="assets/zones/sunlighttoo.mp4" type="video/mp4">
+            </video>
+        </div>
+        
+        <!-- Twilight Zone (with layers) -->
+        <div class="video-layer" data-zone="twilight">
+            <video class="layer-bg" muted loop playsinline preload="auto">
+                <source src="assets/zones/twilight-layers/background.mp4" type="video/mp4">
+            </video>
+            <video class="layer-main" muted loop playsinline preload="auto">
+                <source src="assets/zones/twilight.mp4" type="video/mp4">
+            </video>
+            <video class="layer-fg" muted loop playsinline preload="auto">
+                <source src="assets/zones/twilight-layers/foreground.mp4" type="video/mp4">
+            </video>
+        </div>
+        
+        <!-- Midnight Zone (with layers) -->
+        <div class="video-layer" data-zone="midnight">
+            <video class="layer-bg" muted loop playsinline preload="auto">
+                <source src="assets/zones/midnight-layers/background.mp4" type="video/mp4">
+            </video>
+            <video class="layer-main" muted loop playsinline preload="auto">
+                <source src="assets/zones/midnight.mp4" type="video/mp4">
+            </video>
+            <video class="layer-fg" muted loop playsinline preload="auto">
+                <source src="assets/zones/midnight-layers/foreground.mp4" type="video/mp4">
+            </video>
+        </div>
+        
+        <!-- Abyss Zone -->
+        <div class="video-layer" data-zone="abyss">
+            <video class="layer-main" muted loop playsinline preload="auto">
+                <source src="assets/zones/abyss.mp4" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <!-- Event Videos -->
+    <div class="event-layer" id="eventLayer">
+        <video class="event-video" id="eventVideo" muted playsinline preload="auto"></video>
+    </div>
+
+    <!-- Depth Overlay (Progressive Darkness) -->
+    <div class="depth-overlay" id="depthOverlay"></div>
+    
+    <!-- Additional Darkness Layer for Deep Abyss -->
+    <div class="abyss-darkness" id="abyssDarkness"></div>
+
+    <!-- Light Rays -->
+    <div class="light-rays" id="lightRays"></div>
+
+    <!-- Particle System -->
+    <canvas class="particles" id="particles"></canvas>
+
+    <!-- Discovery Flash -->
+    <div class="discovery-flash" id="discoveryFlash"></div>
+
+    <!-- Main Scroll Container -->
+    <main class="descent" id="descent">
+        
+        <!-- INTRO -->
+        <section class="intro-section">
+            <div class="intro-content">
+                <p class="intro-prelude">A Research Expedition</p>
+                <h1 class="intro-title">The Deep</h1>
+                <p class="intro-description">
+                    Descend through the ocean's layers. Discover creatures by hovering over the glowing markers. 
+                    Document your findings in your research journal.
+                </p>
+                <div class="intro-instruction">
+                    <span>Begin your descent</span>
+                    <div class="scroll-line"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUNLIGHT ZONE: 0-200m -->
+        <section class="zone-section" data-zone="sunlight">
+            <div class="zone-intro">
+                <span class="zone-depth">0 — 200 meters</span>
+                <h2 class="zone-title">The Sunlight Zone</h2>
+                <p class="zone-description">
+                    Where light penetrates and life flourishes. Home to the ocean's most vibrant ecosystems.
+                </p>
+            </div>
+
+            <!-- CREATURE: Clownfish -->
+            <div class="creature" data-creature="clownfish" style="--x: 75%; --y: 18%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/clownfish.png" alt="Clownfish">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Clownfish</h3>
+                        <p class="creature-latin">Amphiprioninae</p>
+                        <p class="creature-fact">Lives symbiotically within sea anemones, immune to their stinging tentacles.</p>
+                        <span class="creature-depth-tag">5 — 15m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Sea Turtle -->
+            <div class="creature" data-creature="sea-turtle" style="--x: 22%; --y: 35%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/sea-turtle.png" alt="Green Sea Turtle">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Green Sea Turtle</h3>
+                        <p class="creature-latin">Chelonia mydas</p>
+                        <p class="creature-fact">Can hold their breath for up to 5 hours while sleeping underwater.</p>
+                        <span class="creature-depth-tag">0 — 50m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Manta Ray -->
+            <div class="creature" data-creature="manta-ray" style="--x: 70%; --y: 52%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/manta-ray.png" alt="Manta Ray">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Manta Ray</h3>
+                        <p class="creature-latin">Mobula birostris</p>
+                        <p class="creature-fact">Possesses the largest brain of any fish, capable of self-recognition.</p>
+                        <span class="creature-depth-tag">0 — 120m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Dolphin -->
+            <div class="creature" data-creature="dolphin" style="--x: 28%; --y: 72%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/dolphin.png" alt="Bottlenose Dolphin">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Bottlenose Dolphin</h3>
+                        <p class="creature-latin">Tursiops truncatus</p>
+                        <p class="creature-fact">Sleeps with one eye open and half their brain awake.</p>
+                        <span class="creature-depth-tag">0 — 200m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zone-transition">
+                <p>Light begins to fade...</p>
+            </div>
+        </section>
+
+        <!-- TWILIGHT ZONE: 200-1000m -->
+        <section class="zone-section" data-zone="twilight">
+            <div class="zone-intro">
+                <span class="zone-depth">200 — 1,000 meters</span>
+                <h2 class="zone-title">The Twilight Zone</h2>
+                <p class="zone-description">
+                    Light fades to darkness. Creatures here navigate a world of shadows.
+                </p>
+            </div>
+
+            <!-- CREATURE: Humpback Whale -->
+            <div class="creature" data-creature="humpback" style="--x: 72%; --y: 18%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/humpback.png" alt="Humpback Whale">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Humpback Whale</h3>
+                        <p class="creature-latin">Megaptera novaeangliae</p>
+                        <p class="creature-fact">Their songs can travel 10,000 miles through the ocean.</p>
+                        <span class="creature-depth-tag">0 — 500m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Giant Squid -->
+            <div class="creature" data-creature="giant-squid" style="--x: 25%; --y: 35%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/giant-squid.png" alt="Giant Squid">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Giant Squid</h3>
+                        <p class="creature-latin">Architeuthis dux</p>
+                        <p class="creature-fact">Has the largest eyes in the animal kingdom — the size of dinner plates.</p>
+                        <span class="creature-depth-tag">300 — 1000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Lanternfish -->
+            <div class="creature" data-creature="lanternfish" style="--x: 68%; --y: 52%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/lanternfish.png" alt="Lanternfish">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Lanternfish</h3>
+                        <p class="creature-latin">Myctophidae</p>
+                        <p class="creature-fact">The most abundant fish in the ocean, performing Earth's largest daily migration.</p>
+                        <span class="creature-depth-tag">200 — 1000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Swordfish -->
+            <div class="creature" data-creature="swordfish" style="--x: 30%; --y: 72%;">
+                <div class="creature-marker">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/swordfish.png" alt="Swordfish">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Swordfish</h3>
+                        <p class="creature-latin">Xiphias gladius</p>
+                        <p class="creature-fact">Can heat their eyes and brain to hunt in cold depths.</p>
+                        <span class="creature-depth-tag">0 — 1000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zone-transition">
+                <p>Sunlight can no longer reach here...</p>
+            </div>
+        </section>
+
+        <!-- MIDNIGHT ZONE: 1000-4000m -->
+        <section class="zone-section" data-zone="midnight">
+            <div class="zone-intro">
+                <span class="zone-depth">1,000 — 4,000 meters</span>
+                <h2 class="zone-title">The Midnight Zone</h2>
+                <p class="zone-description">
+                    Complete darkness. Life creates its own light. Pressure would crush a human.
+                </p>
+            </div>
+
+            <!-- CREATURE: Anglerfish -->
+            <div class="creature" data-creature="anglerfish" style="--x: 70%; --y: 15%;">
+                <div class="creature-marker marker-bioluminescent">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/anglerfish.png" alt="Anglerfish">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Anglerfish</h3>
+                        <p class="creature-latin">Lophiiformes</p>
+                        <p class="creature-fact">Males fuse permanently to females, sharing a bloodstream.</p>
+                        <span class="creature-depth-tag">1000 — 3000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Jellyfish -->
+            <div class="creature" data-creature="jellyfish" style="--x: 28%; --y: 32%;">
+                <div class="creature-marker marker-bioluminescent">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/jellyfish.png" alt="Deep Sea Jellyfish">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Deep Sea Jellyfish</h3>
+                        <p class="creature-latin">Atolla wyvillei</p>
+                        <p class="creature-fact">Produces a bioluminescent "burglar alarm" when attacked.</p>
+                        <span class="creature-depth-tag">500 — 4000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CREATURE: Vampire Squid -->
+            <div class="creature" data-creature="vampire-squid" style="--x: 68%; --y: 50%;">
+                <div class="creature-marker marker-bioluminescent">
+                    <div class="marker-ping"></div>
+                    <div class="marker-dot"></div>
+                    <span class="marker-label">Species</span>
+                </div>
+                <div class="creature-card">
+                    <div class="creature-image">
+                        <img src="assets/creatures/vampire-squid.png" alt="Vampire Squid">
+                    </div>
+                    <div class="creature-info">
+                        <span class="creature-discovered-tag">Discovered</span>
+                        <h3>Vampire Squid</h3>
+                        <p class="creature-latin">Vampyroteuthis infernalis</p>
+                        <p class="creature-fact">Feeds on "marine snow" — falling organic debris.</p>
+                        <span class="creature-depth-tag">600 — 3000m depth</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zone-transition">
+                <p>You are entering the abyss...</p>
+            </div>
+        </section>
+
+        <!-- THE ABYSS: 4000-4500m (all content, abyss video stays visible) -->
+        <section class="zone-section zone-final" data-zone="abyss">
+            <!-- Abyss intro - scrolls away -->
+            <div class="abyss-intro-area">
+                <div class="zone-intro">
+                    <span class="zone-depth">4,000 meters</span>
+                    <h2 class="zone-title">The Abyss</h2>
+                    <p class="zone-description">
+                        The ocean floor. Near-freezing temperatures. Crushing pressure. Yet life persists in eternal darkness.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Scroll gap -->
+            <div class="abyss-spacer"></div>
+
+            <!-- CREATURE: Giant Isopod -->
+            <div class="abyss-creature-area">
+                <div class="creature" data-creature="giant-isopod" style="--x: 50%; --y: 50%;">
+                    <div class="creature-marker marker-bioluminescent">
+                        <div class="marker-ping"></div>
+                        <div class="marker-dot"></div>
+                        <span class="marker-label">Species</span>
+                    </div>
+                    <div class="creature-card">
+                        <div class="creature-image">
+                            <img src="assets/creatures/giant-isopod.png" alt="Giant Isopod">
+                        </div>
+                        <div class="creature-info">
+                            <span class="creature-discovered-tag">Discovered</span>
+                            <h3>Giant Isopod</h3>
+                            <p class="creature-latin">Bathynomus giganteus</p>
+                            <p class="creature-fact">Can survive over 5 years without eating. Related to the common woodlouse, but adapted to extreme depths.</p>
+                            <span class="creature-depth-tag">170 — 2500m depth</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extended scroll gap before final message -->
+            <div class="abyss-descent"></div>
+
+            <!-- Final Message Area (separate from abyss intro) -->
+            <div class="final-section">
+                <div class="final-content">
+                    <h2>You've reached the bottom.</h2>
+                    <p class="final-stats">
+                        <span class="stat-highlight" id="finalDepth">4,500</span> meters descended<br>
+                        <span class="stat-highlight" id="finalSpecies">0</span> of 12 species discovered
+                    </p>
+                    <p>
+                        Over 80% of the ocean remains unexplored. What you've seen is just a glimpse 
+                        of the mysteries beneath the surface.
+                    </p>
+                    <button class="ascend-btn" id="ascendBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 19V5M5 12l7-7 7 7"/>
+                        </svg>
+                        <span>Ascend to Surface</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Creature Modal -->
+    <div class="creature-modal" id="creatureModal">
+        <button class="creature-modal-close" id="creatureModalClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </button>
+        <div class="creature-modal-content" id="creatureModalContent">
+            <!-- Content will be injected by JS -->
+        </div>
+    </div>
+
+    <!-- Research Journal Modal -->
+    <div class="journal-modal" id="journalModal">
+        <div class="journal-content">
+            <button class="journal-close" id="journalClose" aria-label="Close journal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+            
+            <div class="journal-header">
+                <h2>Research Journal</h2>
+                <p>Species discovered during your descent</p>
+            </div>
+
+            <div class="journal-stats">
+                <div class="stat">
+                    <span class="stat-number" id="journalDepth">0</span>
+                    <span class="stat-label">Max depth (m)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="journalSpecies">0</span>
+                    <span class="stat-label">Species found</span>
+                </div>
+            </div>
+
+            <p class="journal-entries-title">Catalogued Species</p>
+            <div class="journal-entries" id="journalEntries">
+                <div class="journal-empty">
+                    <p>No species discovered yet.</p>
+                    <p class="journal-empty-hint">Hover over glowing markers to discover creatures.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Audio - Your Ocean Sounds -->
+    <audio id="audioBubbles" loop preload="auto" src="assets/audio/bubbles.mp3"></audio>
+    <audio id="audioMoreBubbles" loop preload="auto" src="assets/audio/morebubbles.mp3"></audio>
+    <audio id="audioDeep" loop preload="auto" src="assets/audio/deeplowallaroundsound.mp3"></audio>
+    <audio id="audioWhalePassing" preload="auto" src="assets/audio/whale-passing.mp3"></audio>
+
+    <script src="app.js"></script>
+</body>
+</html>
