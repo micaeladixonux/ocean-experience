@@ -557,10 +557,11 @@ body {
 }
 
 .intro-prelude {
-    font-size: 0.7rem;
-    letter-spacing: 0.35em;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: var(--surface-light);
+    color: rgba(255, 255, 255, 0.95);
     margin-bottom: 0.75rem;
     animation: fadeIn 1s var(--ease-out) 0.2s both;
 }
