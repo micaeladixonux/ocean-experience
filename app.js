@@ -3,6 +3,15 @@
  */
 
 // ============================================
+// SAFARI DETECTION
+// ============================================
+
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+if (isSafari) {
+    document.documentElement.classList.add('is-safari');
+}
+
+// ============================================
 // STATE
 // ============================================
 
@@ -253,9 +262,22 @@ function switchVideoLayer(index) {
         const videos = layer.querySelectorAll('video');
         if (i === index) {
             layer.classList.add('active');
-            videos.forEach(v => v.play().catch(() => {}));
+            // Ensure videos play - slight delay for Safari
+            setTimeout(() => {
+                videos.forEach(v => {
+                    v.play().catch(() => {});
+                });
+            }, isSafari ? 100 : 0);
         } else {
             layer.classList.remove('active');
+            // Safari optimization: pause inactive videos to reduce load
+            if (isSafari) {
+                setTimeout(() => {
+                    if (!layer.classList.contains('active')) {
+                        videos.forEach(v => v.pause());
+                    }
+                }, 500);
+            }
         }
     });
 }
@@ -416,7 +438,9 @@ function initParticles() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     
-    for (let i = 0; i < 40; i++) particlesList.push(createParticle());
+    // Fewer particles on Safari for performance
+    const particleCount = isSafari ? 15 : 40;
+    for (let i = 0; i < particleCount; i++) particlesList.push(createParticle());
     animateParticles();
 }
 
@@ -437,7 +461,18 @@ function createParticle() {
     };
 }
 
+let lastParticleFrame = 0;
+const particleFrameInterval = isSafari ? 2 : 1; // Safari: skip every other frame
+
 function animateParticles() {
+    lastParticleFrame++;
+    
+    // Safari: only render every 2nd frame for performance
+    if (isSafari && lastParticleFrame % particleFrameInterval !== 0) {
+        requestAnimationFrame(animateParticles);
+        return;
+    }
+    
     particleCtx.clearRect(0, 0, el.particles.width, el.particles.height);
     
     const ratio = state.smoothDepth / state.maxDepth;

@@ -36,6 +36,11 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Safari: Disable smooth scroll - causes stuttering */
+html.is-safari {
+    scroll-behavior: auto;
+}
+
 body {
     font-family: var(--font-body);
     background: var(--midnight);
@@ -1736,4 +1741,93 @@ body {
         gap: 0.6rem;
         padding: 0.5rem 0.8rem;
     }
+}
+
+/* ============================================
+   SAFARI-SPECIFIC OPTIMIZATIONS
+   Applied via .is-safari class on <html>
+   ============================================ */
+
+/* Remove backdrop-filter - major Safari performance killer */
+.is-safari .journal-btn,
+.is-safari .sound-hint,
+.is-safari .sound-btn,
+.is-safari .creature-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(10, 20, 35, 0.95);
+}
+
+.is-safari .journal-content {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(5, 15, 35, 0.98);
+}
+
+/* Simplify video layer transitions */
+.is-safari .video-layer {
+    transition: opacity 1s ease;
+}
+
+/* Disable continuous video drift animation */
+.is-safari .video-layer video {
+    animation: none;
+    transform: translate(-50%, -50%);
+}
+
+/* Simplify light rays - static instead of animated */
+.is-safari .light-rays {
+    animation: none;
+}
+
+/* Reduce particle canvas opacity for less strain */
+.is-safari .particles {
+    opacity: 0.5;
+}
+
+/* Simplify marker animations */
+.is-safari .marker-dot {
+    animation: none;
+    box-shadow: 
+        0 0 15px var(--bioluminescent),
+        0 0 30px var(--bioluminescent-soft);
+}
+
+.is-safari .marker-ping {
+    animation: markerPing 3s ease-out infinite;
+}
+
+/* Disable gradient text animations - use solid color */
+.is-safari .journal-header h2,
+.is-safari .stat-number {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: var(--bioluminescent);
+    background-clip: unset;
+}
+
+/* Simpler creature card transitions */
+.is-safari .creature-card {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Disable zone intro slide animations - use simple fade */
+.is-safari .zone-section.in-view .zone-intro .zone-depth,
+.is-safari .zone-section.in-view .zone-intro .zone-title,
+.is-safari .zone-section.in-view .zone-intro .zone-description {
+    animation: safariSimpleFade 0.8s ease both;
+}
+
+@keyframes safariSimpleFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Reduce box-shadow complexity */
+.is-safari .journal-content {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.is-safari .creature:hover .creature-card {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
 }
